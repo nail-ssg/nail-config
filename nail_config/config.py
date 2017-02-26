@@ -11,9 +11,12 @@ class Config(object):
 
     def __init__(self, filename='.config.yml'):
         self._config_filename = filename
-        self._config = self.load_config()
+        self._config = self.load()
 
-    def load_config(self):
+    def __call__(self, option: str = None, default_value=None):
+        return self.config(option, default_value)
+
+    def load(self):
         filename = self._config_filename
         self._config = {}
         if not os.path.exists(filename):
@@ -23,9 +26,6 @@ class Config(object):
                 d = yaml.load(f, yaml.RoundTripLoader)
                 self._config = dict_concat2(self._config, d)
         return self._config
-
-    def __call__(self, option: str = None, default_value=None):
-        return self.config(option, default_value)
 
     def config(self, option: str = None, default_value=None):
         section = self._default_config.copy()
