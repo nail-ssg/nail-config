@@ -1,17 +1,21 @@
 import os
-from .common import dict_enrich, dict_concat2
+from common import dict_enrich, dict_concat2
 import ruamel.yaml as yaml
 
 
 class Config(object):
+
     """docstring for Config"""
     _default_config = {}
     _config = {}
     _config_filename = ''
+    _yaml_config = None
 
     def __init__(self, filename='.config.yml'):
         self._config_filename = filename
         self._config = self.load()
+        self._yaml_config = yaml.comments.CommentedMap()
+        print(self.as_yamlstr())
 
     def __call__(self, option: str = None, default_value=None):
         return self.config(option, default_value)
@@ -48,3 +52,50 @@ class Config(object):
 
     def default_config(self, dconf, comments):
         self._default_config = dict_enrich(self._default_config, dconf)
+
+    def as_yamlstr(self):
+        return yaml.dump(self._yaml_config, Dumper=yaml.RoundTripDumper)
+
+    def set_option(self, option_name: str, value, comment=None):
+        old_value = None
+        options = option_name.split('.')
+        last_opt = options[-1]
+        node = self._yaml_config
+        for option in options[:-1]:
+            if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
+                node[option] = yaml.comments.CommentedMap()
+            node = node[option]
+        if last_opt in node:
+            old_value = node[last_opt]
+        node[last_opt] = value
+        if comment is not None:
+            node.yaml_add_eol_comment(comment, last_opt)
+        return old_value
+
+    def get_option(self, option_name: str):
+        value = None
+        options = option_name.split('.')
+        last_opt = options[-1]
+        node = self._yaml_config
+        for option in options[:-1]:
+            if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
+                return None
+            node = node[option]
+        if last_opt in node:
+            value = node[last_opt]
+        return value
+
+    def get_comment(self, option_name: str):
+        value = None
+        options = option_name.split('.')
+        last_opt = options[-1]
+        node = self._yaml_config
+        for option in options[:-1]:
+            if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
+                return None
+            node = node[option]
+        if last_opt in node and last_opt in node.ca.items and node.ca.items[last_opt][2] is not None:
+            value = node.ca.items[last_opt][2].value
+            if value is not None:
+                value = value[3:]
+        return value
