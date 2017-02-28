@@ -7,15 +7,16 @@ class Config(object):
 
     """docstring for Config"""
     _default_config = {}
+    _default_config_list = []
     _config = {}
     _config_filename = ''
     _yaml_config = None
+    _comments = {}
 
     def __init__(self, filename='.config.yml'):
         self._config_filename = filename
         self._config = self.load()
         self._yaml_config = yaml.comments.CommentedMap()
-        print(self.as_yamlstr())
 
     def __call__(self, option: str = None, default_value=None):
         return self.config(option, default_value)
@@ -50,7 +51,35 @@ class Config(object):
         with open(self._config_filename, 'w') as f:
             yaml.dump(self._config, f, default_flow_style=False)
 
-    def default_config(self, dconf, comments):
+    def _assemble(self):
+        """ default-config + config + comments = yaml-config """
+        self._default_config = {}
+        for dconf in self._default_config_list:
+            self._default_config = dict_enrich(self._default_config, dconf)
+        result = dict_concat2(self._default_config, self._config)
+        self._yaml_config = yaml.comments.CommentedMap(result)
+
+    @staticmethod
+    def _extract_comments(self, yaml_branch):
+        result = {}
+        for key in yaml_branch:
+            result[key] = {
+            '#before': None,
+            '#eol':None, !todo: Заменить None на извлечение коментария
+            '#after':None
+            }
+            if isinstance(key, yaml.comments.CommentedMap):
+                result[key]['childs'] = self._extract_comments(yaml_branch[key])
+
+
+    def _separate(self):
+        """ yaml-config -> (config, comments) """
+        self._config = yaml.load(self.as_yamlstr())
+        self._comments = self._extract_comments(self.as_yamlstr())
+
+    def add_default_config(self, dconf, comments):
+        if dconf not in self._default_config_list:
+            self._default_config_list += [dconf]
         self._default_config = dict_enrich(self._default_config, dconf)
 
     def as_yamlstr(self):
@@ -72,7 +101,7 @@ class Config(object):
             node.yaml_add_eol_comment(comment, last_opt)
         return old_value
 
-    def get_option(self, option_name: str):
+    def _get_node(self, option_name: str):
         value = None
         options = option_name.split('.')
         last_opt = options[-1]
@@ -81,21 +110,31 @@ class Config(object):
             if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
                 return None
             node = node[option]
-        if last_opt in node:
+        return node
+
+    def get_option(self, option_name: str):
+        value = None
+        last_opt = option_name.split('.')[-1]
+        node = self._get_node(option_name)
+        if node and last_opt in node:
             value = node[last_opt]
         return value
 
     def get_comment(self, option_name: str):
         value = None
-        options = option_name.split('.')
-        last_opt = options[-1]
-        node = self._yaml_config
-        for option in options[:-1]:
-            if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
-                return None
-            node = node[option]
-        if last_opt in node and last_opt in node.ca.items and node.ca.items[last_opt][2] is not None:
+        last_opt = option_name.split('.')[-1]
+        node = self._get_node(option_name)
+        if node and last_opt in node and last_opt in node.ca.items and node.ca.items[last_opt][2] is not None:
             value = node.ca.items[last_opt][2].value
             if value is not None:
                 value = value[3:]
         return value
+
+    def set_comment(self, option_name: str, comment: str):
+        last_opt = option_name.split('.')[-1]
+        node = self._get_node(option_name)
+        if last_opt in node:
+            if comment is not None:
+                node.yaml_add_eol_comment(comment, last_opt)
+            else:
+                node.ca.items[last_opt][2] = None
