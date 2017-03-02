@@ -1,0 +1,7 @@
+a: 1 # comment1
+b:
+  c: 3 # comment2
+  d: 1 # comment3
+  e: '#' # comment4
+c:
+- a # comment5
