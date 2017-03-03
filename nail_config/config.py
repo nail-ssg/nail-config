@@ -33,7 +33,6 @@ class Config(object):
         result = dict_concat2(_default_config, self._config)
         self._yaml_config = yaml.load(yaml.dump(result, Dumper=yaml.Dumper), Loader=yaml.RoundTripLoader)
         self._set_comments(self._yaml_config, self._comments)
-        print('\n==========\n', self._yaml_config)
 
     def _set_comments(self, node, comments):
         for key in node:
