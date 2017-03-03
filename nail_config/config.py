@@ -1,5 +1,5 @@
 import os
-from common import dict_enrich, dict_concat2
+from nail_config.common import dict_enrich, dict_concat2
 import ruamel.yaml as yaml
 
 
