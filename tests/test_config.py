@@ -50,6 +50,60 @@ def test_set_comment(empty_conf):
     assert comment == 'comment2'
 
 
+def test_set_default_config(empty_conf):
+    def_conf1 = {
+        'a': 'b',
+        'c': {
+            'd': 'e'
+        }
+    }
+    def_conf2 = {
+        'a': 'bb',
+        'f': 'g',
+        'c': {
+            'd': 'ee',
+            'i': 'j'
+        }
+    }
+    result_conf1 = {
+        'a': 'b',
+        'c': {
+            'd': 'e',
+            'i': 'j'
+        },
+        'f': 'g'
+    }
+    result_conf2 = {
+        'a': 'b',
+        'c': {
+            'd': 'eee',
+            'i': 'j'
+        },
+        'f': 'g'
+    }
+    empty_conf.add_default_config(def_conf1, None)
+    empty_conf.add_default_config(def_conf2, None)
+    assert empty_conf() == result_conf1
+    empty_conf.set_option('c.d', 'eee')
+    assert empty_conf() == result_conf2
+
+
+def test_set_default_config_with_comments(empty_conf):
+    def_conf1 = {
+        'a': 'b',
+        'c': {
+            'd': 'e'
+        }
+    }
+    comments = {
+        'a': 'comment1',
+        'c.d': 'comment2',
+    }
+    empty_conf.add_default_config(def_conf1, comments)
+    assert empty_conf.get_comment('a') == 'comment1'
+    assert empty_conf.get_comment('c.d') == 'comment2'
+
+
 @pytest.fixture(scope='function')
 def two_conf():
     conf1 = Config()

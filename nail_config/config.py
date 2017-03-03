@@ -27,13 +27,13 @@ class Config(object):
         if not self._changed and not forced:
             return
         self._changed = False
-        self._default_config = {}
+        _default_config = {}
         for dconf in self._default_config_list:
-            self._default_config = dict_enrich(self._default_config, dconf)
-        result = dict_concat2(self._default_config, self._config)
+            _default_config = dict_enrich(_default_config, dconf)
+        result = dict_concat2(_default_config, self._config)
         self._yaml_config = yaml.load(yaml.dump(result, Dumper=yaml.Dumper), Loader=yaml.RoundTripLoader)
         self._set_comments(self._yaml_config, self._comments)
-        print('\n==========\n',self._yaml_config)
+        print('\n==========\n', self._yaml_config)
 
     def _set_comments(self, node, comments):
         for key in node:
@@ -69,10 +69,12 @@ class Config(object):
         self._comments = self._extract_comments(self._yaml_config)
 
     def _get_node(self, option_name: str):
+        node = self._yaml_config
+        if not option_name:
+            return node
         value = None
         options = option_name.split('.')
         last_opt = options[-1]
-        node = self._yaml_config
         for option in options[:-1]:
             if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
                 return None
@@ -116,9 +118,12 @@ class Config(object):
 
     def get_option(self, option_name: str, default_value=None):
         self._assemble()
+        node = self._get_node(option_name)
+        if not option_name:
+            value = self._yaml_config
+            return yaml.load(yaml.dump(value, Dumper=yaml.RoundTripDumper), Loader=yaml.Loader)
         value = default_value
         last_opt = option_name.split('.')[-1]
-        node = self._get_node(option_name)
         if node and last_opt in node:
             value = node[last_opt]
             if isinstance(value, yaml.comments.CommentedMap):
@@ -132,6 +137,10 @@ class Config(object):
         result = self._get_comment(node, last_opt)
         return result
 
+    def set_comment(self, option_name: str, comment: str):
+        self._change_tree(self._comments, option_name+'.#eol', comment)
+        self._changed = True
+
     @staticmethod
     def _change_tree(tree: dict, path: str, value):
         parts = path.split('.')
@@ -144,10 +153,6 @@ class Config(object):
         old_value = node[last_part] if last_part in node else None
         node[last_part] = value
         return old_value
-
-    def set_comment(self, option_name: str, comment: str):
-        self._change_tree(self._comments, option_name+'.#eol', comment)
-        self._changed = True
 
     @staticmethod
     def _get_round_comment(node, key):
