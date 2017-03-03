@@ -1,0 +1,4 @@
+.cache/
+.tox/
+nail_config.egg-info/
+__pycache__
