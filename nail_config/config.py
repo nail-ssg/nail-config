@@ -106,6 +106,11 @@ class Config(object):
         if dconf not in self._default_config_list:
             self._default_config_list += [dconf]
         self._default_config = dict_enrich(self._default_config, dconf)
+        if comments:
+            for key in comments:
+                if self.get_comment(key) is None:
+                    self.set_comment(key, comments[key])
+
 
     def as_yamlstr(self):
         self._assemble()

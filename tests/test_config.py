@@ -2,7 +2,7 @@ import sys
 import os
 import pytest
 from .prints import yprint
-sys.path += ['.\\nail_config']
+sys.path += ['./nail_config']
 from config import Config
 
 
