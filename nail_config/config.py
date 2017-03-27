@@ -72,7 +72,7 @@ class Config(object):
         if not option_name:
             return node
         value = None
-        options = option_name.split('.')
+        options = option_name.split('/')
         last_opt = options[-1]
         for option in options[:-1]:
             if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
@@ -127,7 +127,7 @@ class Config(object):
             value = self._yaml_config
             return yaml.load(yaml.dump(value, Dumper=yaml.RoundTripDumper), Loader=yaml.Loader)
         value = default_value
-        last_opt = option_name.split('.')[-1]
+        last_opt = option_name.split('/')[-1]
         if node and last_opt in node:
             value = node[last_opt]
             if isinstance(value, yaml.comments.CommentedMap):
@@ -136,7 +136,7 @@ class Config(object):
 
     def get_comment(self, option_name: str):
         self._assemble()
-        last_opt = option_name.split('.')[-1]
+        last_opt = option_name.split('/')[-1]
         node = self._get_node(option_name)
         result = self._get_comment(node, last_opt)
         return result
