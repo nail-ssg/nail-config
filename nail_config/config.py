@@ -99,7 +99,7 @@ class Config(object):
     def save(self):
         self._assemble()
         with open(self.filename, 'w', encoding='utf-8') as f:
-            yaml.dump(self._yaml_config, f, dumper=yaml.RoundTripDumper)
+            yaml.dump(self._yaml_config, f, Dumper=yaml.RoundTripDumper)
 
     def add_default_config(self, dconf, comments):
         self._changed = True
