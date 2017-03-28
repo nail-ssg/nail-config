@@ -145,7 +145,7 @@ class Config(object):
 
     def set_comment(self, option_name: str, comment: str):
         if comment[0] == '^':
-            option_name = option_name[1:]+'.#before'
+            option_name = option_name+'.#before'
         else:
             option_name = option_name+'.#eol'
         self._change_tree(self._comments, option_name, comment)
