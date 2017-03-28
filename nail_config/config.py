@@ -91,7 +91,7 @@ class Config(object):
         self._yaml_config = yaml.comments.CommentedMap()
         if os.path.exists(filename):
             try:
-                with open(filename, 'r') as f:
+                with open(filename, 'r', encoding='utf-8') as f:
                     self.loads(f)
                 return True
             except Exception as e:
