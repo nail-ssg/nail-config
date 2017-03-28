@@ -39,6 +39,9 @@ class Config(object):
             if key in comments:
                 if '#eol' in comments[key] and comments[key]['#eol'] is not None:
                     node.yaml_add_eol_comment(comments[key]['#eol'], key)
+                if '#before' in comments[key] and comments[key]['#before'] is not None:
+                    node.yaml_add_eol_comment(comments[key]['#before'], key)
+                    node.yaml_set_comment_before_after_key(key, before=comments[key]['#before'])
                 sub_node = node[key]
                 if isinstance(sub_node, yaml.comments.CommentedMap):
                     self._set_comments(sub_node, comments[key])
@@ -142,7 +145,11 @@ class Config(object):
         return result
 
     def set_comment(self, option_name: str, comment: str):
-        self._change_tree(self._comments, option_name+'.#eol', comment)
+        if option_name[0] == '^':
+            option_name = option_name[1:]+'.#before'
+        else:
+            option_name = option_name+'.#eol'
+        self._change_tree(self._comments, option_name, comment)
         self._changed = True
 
     @staticmethod
