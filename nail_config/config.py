@@ -145,7 +145,7 @@ class Config(object):
         return result
 
     def set_comment(self, option_name: str, comment: str):
-        if option_name[0] == '^':
+        if comment[0] == '^':
             option_name = option_name[1:]+'.#before'
         else:
             option_name = option_name+'.#eol'
