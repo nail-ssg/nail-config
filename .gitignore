@@ -2,3 +2,6 @@
 .tox/
 nail_config.egg-info/
 __pycache__
+build/
+nail.config.egg-info/
+*.egg
