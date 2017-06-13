@@ -192,7 +192,7 @@ class Config(object):
     def _set_comment(node, option_name: str, comment: str):
         if option_name in node:
             if comment is not None:
-                if comment[0]=='^':
+                if comment[0] == '^':
                     node.yaml_set_comment_before_after_key(option_name, before=comment[1:])
                 else:
                     node.yaml_add_eol_comment(comment, option_name)
