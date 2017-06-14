@@ -12,8 +12,8 @@ class Config(object):
     _yaml_config = None
     _comments = {}
     _changed = False
+    delimeter = '/'
     filename = ''
-
     def __init__(self):
         self._yaml_config = yaml.comments.CommentedMap()
         self._config = {}
@@ -37,10 +37,12 @@ class Config(object):
     def _set_comments(self, node, comments):
         for key in node:
             if key in comments:
-                if '#eol' in comments[key] and comments[key]['#eol'] is not None:
-                    node.yaml_add_eol_comment(comments[key]['#eol'], key)
-                if '#before' in comments[key] and comments[key]['#before'] is not None:
-                    node.yaml_set_comment_before_after_key(key, before=comments[key]['#before'])
+                comment=comments[key]
+                if comment is not None:
+                    if '#eol' in comment and comment['#eol'] is not None:
+                        node.yaml_add_eol_comment(comment['#eol'], key)
+                    if '#before' in comment and comment['#before'] is not None:
+                        node.yaml_set_comment_before_after_key(key, before=comment['#before'])
                 sub_node = node[key]
                 if isinstance(sub_node, yaml.comments.CommentedMap):
                     self._set_comments(sub_node, comments[key])
@@ -74,7 +76,7 @@ class Config(object):
         if not option_name:
             return node
         value = None
-        options = option_name.split('/')
+        options = option_name.split(self.delimeter)
         last_opt = options[-1]
         for option in options[:-1]:
             if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
@@ -118,7 +120,7 @@ class Config(object):
         return yaml.dump(self._yaml_config, Dumper=yaml.RoundTripDumper)
 
     def set_option(self, option_name: str, value, comment=None):
-        old_value = self._change_tree(self._config, option_name, value)
+        old_value = self._change_tree(self._config, option_name, value, self.delimeter)
         self.set_comment(option_name, comment)
         return old_value
 
@@ -129,7 +131,7 @@ class Config(object):
             value = self._yaml_config
             return yaml.load(yaml.dump(value, Dumper=yaml.RoundTripDumper), Loader=yaml.Loader)
         value = default_value
-        last_opt = option_name.split('/')[-1]
+        last_opt = option_name.split(self.delimeter)[-1]
         if node and last_opt in node:
             value = node[last_opt]
             if isinstance(value, yaml.comments.CommentedMap):
@@ -138,22 +140,24 @@ class Config(object):
 
     def get_comment(self, option_name: str):
         self._assemble()
-        last_opt = option_name.split('/')[-1]
+        last_opt = option_name.split(self.delimeter)[-1]
         node = self._get_node(option_name)
         result = self._get_comment(node, last_opt)
         return result
 
     def set_comment(self, option_name: str, comment: str):
-        if comment[0] == '^':
-            option_name = option_name+'.#before'
-        else:
-            option_name = option_name+'.#eol'
-        self._change_tree(self._comments, option_name, comment)
+        print(comment)
+        if comment is not None:
+            if comment[0] == '^':
+                option_name = option_name+'.#before'
+            else:
+                option_name = option_name+'.#eol'
+        self._change_tree(self._comments, option_name, comment, self.delimeter)
         self._changed = True
 
     @staticmethod
-    def _change_tree(tree: dict, path: str, value):
-        parts = path.split('.')
+    def _change_tree(tree: dict, path: str, value, delimeter='/'):
+        parts = path.split(delimeter)
         last_part = parts[-1]
         node = tree
         for part in parts[:-1]:

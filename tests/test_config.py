@@ -9,6 +9,7 @@ from config import Config
 @pytest.fixture(scope='function')
 def empty_conf():
     conf = Config()
+    conf.delimeter = '.'
     return conf
     del conf
 
