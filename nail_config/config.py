@@ -14,6 +14,7 @@ class Config(object):
     _changed = False
     delimeter = '/'
     filename = ''
+
     def __init__(self):
         self._yaml_config = yaml.comments.CommentedMap()
         self._config = {}
@@ -37,7 +38,7 @@ class Config(object):
     def _set_comments(self, node, comments):
         for key in node:
             if key in comments:
-                comment=comments[key]
+                comment = comments[key]
                 if comment is not None:
                     if '#eol' in comment and comment['#eol'] is not None:
                         node.yaml_add_eol_comment(comment['#eol'], key)
@@ -148,9 +149,9 @@ class Config(object):
     def set_comment(self, option_name: str, comment: str):
         if comment is not None:
             if comment[0] == '^':
-                option_name = self.delimeter.join([option_name,'#before'])
+                option_name = self.delimeter.join([option_name, '#before'])
             else:
-                option_name = self.delimeter.join([option_name,'#eol'])
+                option_name = self.delimeter.join([option_name, '#eol'])
         self._change_tree(self._comments, option_name, comment, self.delimeter)
         self._changed = True
 
