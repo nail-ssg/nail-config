@@ -1,5 +1,5 @@
 import os
-from nail_config.common import dict_enrich, dict_concat2
+from nail_config.common import dict_glue, dict_update
 import ruamel.yaml as yaml
 
 
@@ -29,8 +29,8 @@ class Config(object):
         self._changed = False
         _default_config = {}
         for dconf in self._default_config_list:
-            _default_config = dict_enrich(_default_config, dconf)
-        result = dict_concat2(_default_config, self._config)
+            dict_update(_default_config, dconf)
+        result = dict_glue(_default_config, self._config, nochange=False)
         self._yaml_config = yaml.load(yaml.dump(result, Dumper=yaml.Dumper), Loader=yaml.RoundTripLoader)
         self._set_comments(self._yaml_config, self._comments)
 
@@ -109,7 +109,7 @@ class Config(object):
         self._changed = True
         if dconf not in self._default_config_list:
             self._default_config_list += [dconf]
-        self._default_config = dict_enrich(self._default_config, dconf)
+        dict_update(self._default_config, dconf)
         if comments:
             for key in comments:
                 if self.get_comment(key) is None:
@@ -146,12 +146,11 @@ class Config(object):
         return result
 
     def set_comment(self, option_name: str, comment: str):
-        print(comment)
         if comment is not None:
             if comment[0] == '^':
-                option_name = option_name+'.#before'
+                option_name = self.delimeter.join([option_name,'#before'])
             else:
-                option_name = option_name+'.#eol'
+                option_name = self.delimeter.join([option_name,'#eol'])
         self._change_tree(self._comments, option_name, comment, self.delimeter)
         self._changed = True
 

@@ -1,54 +1,65 @@
-def dict_concat(dict1, dict2):
-    """
-    Существующие значения изменяются
-    Не существующие добавляются
-    >>> d = {'a':{'b':'c'}, 'd':['e','f'], 'g':'f'}
-    >>> dict_concat(d, {'a':{'b':'cc', 'i':'j'}, 'd':['e','h'], 'g':'ff'})
-    >>> d == {'a': {'b': 'cc', 'i': 'j'}, 'd': ['e', 'f', 'h'], 'g': 'ff'}
-    True
-    """
+def is_del_key(dct: dict, key: str):
+    return len(key) > 1 and key[0] == '-' and dct[key] is None
+
+
+def dict_update(result: dict, dict2: dict, nochange=True, callback=None):
+    if callback is None:
+        callback = dict_update
     for key in dict2:
-        if type(dict2[key]) == dict:
-            if key not in dict1 or type(dict1[key]) != dict:
-                dict1[key] = {}
-            dict_concat(dict1[key], dict2[key])
-        elif type(dict2[key]) == list:
-            if key not in dict1 or type(dict1[key]) != list:
-                dict1[key] = []
-            for item in dict2[key]:
-                if item not in dict1[key]:
-                    dict1[key] += [item]
-        else:
-            dict1[key] = dict2[key]
-
-
-def dict_concat2(dict1, dict2):
-    result = dict1.copy()
-    dict_concat(result, dict2)
-    return result
-
-
-def dict_enrich(dict1: dict, dict2: dict):
-    """
-    Существующие значения НЕ изменяются
-    Не существующие добавляются
-    >>> dict_enrich({'a':{'b':'c'}, 'd':['e','f'], 'g':'f'}, {'a':{'b':'cc', 'i':'j'}, 'd':['e','h'], 'g':'ff'}) == {'a':{'b':'c', 'i':'j'}, 'd':['e','f','h'], 'g':'f'}
-    True
-    """
-    result = dict1.copy()
-    for key in dict2:
-        if key in result:
+        if is_del_key(dict2, key):
+            del_key = key[1:]
+            if del_key in result:
+                del result[del_key]
+    if nochange:
+        for key in dict2:
+            if is_del_key(dict2, key):
+                continue
+            if key in result:
+                if type(dict2[key]) == dict:
+                    if type(result[key]) == dict:
+                        result[key] = callback(result[key], dict2[key], nochange)
+                if type(dict2[key]) == list and type(result[key]) == list:
+                    for item in dict2[key]:
+                        if item not in result[key]:
+                            result[key] += [item]
+            else:
+                result[key] = dict2[key]
+    else:
+        for key in dict2:
+            if is_del_key(dict2, key):
+                continue
             if type(dict2[key]) == dict:
-                if type(result[key]) == dict:
-                    result[key] = dict_enrich(result[key], dict2[key])
-            if type(dict2[key]) == list and type(result[key]) == list:
+                if key not in result or type(result[key]) != dict:
+                    result[key] = {}
+                result[key] = callback(result[key], dict2[key], nochange)
+            elif type(dict2[key]) == list:
+                if key not in result or type(result[key]) != list:
+                    result[key] = []
                 for item in dict2[key]:
                     if item not in result[key]:
                         result[key] += [item]
-        else:
-            result[key] = dict2[key]
+            else:
+                result[key] = dict2[key]
     return result
 
+
+def dict_glue(dict1: dict, dict2: dict, nochange=True):
+    result = dict1.copy()
+    dict_update(result, dict2, nochange=nochange, callback=dict_glue)
+    return result
+
+
+def add_to_dict(dct, path, value, delimiter='/'):
+    keys = path.split(delimiter)
+    d = dct
+    for key in keys[:-1]:
+        if key not in d or d[key] is None:
+            d[key] = {}
+        d = d[key]
+        if type(d) != dict:
+            return False
+    d[keys[-1]] = value
+    return True
 
 if __name__ == "__main__":
     import sys
