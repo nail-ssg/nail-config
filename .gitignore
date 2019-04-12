@@ -5,3 +5,4 @@ __pycache__
 build/
 nail.config.egg-info/
 *.egg
+.idea/
