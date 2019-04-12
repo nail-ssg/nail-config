@@ -1,6 +1,8 @@
 import os
 
-import ruamel.yaml as yaml
+from ruamel import yaml
+from ruamel.yaml.comments import CommentedMap
+
 from .common import dict_enrich, dict_concat2
 
 
@@ -129,7 +131,7 @@ class Config(object):
         last_opt = option_name.split('.')[-1]
         if node and last_opt in node:
             value = node[last_opt]
-            if isinstance(value, yaml.comments.CommentedMap):
+            if isinstance(value, CommentedMap):
                 value = yaml.load(yaml.dump(value, Dumper=yaml.RoundTripDumper), Loader=yaml.Loader)
         return value
 
@@ -185,6 +187,6 @@ class Config(object):
     def _set_comment(node, option_name: str, comment: str):
         if option_name in node:
             if comment is not None:
-                node.yaml_add_eol_comment(comment, last_opt)
+                node.yaml_add_eol_comment(comment, option_name)
             else:
                 node.ca.items[option_name][2] = None
