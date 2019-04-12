@@ -2,3 +2,4 @@
 .tox/
 nail_config.egg-info/
 __pycache__
+.idea/

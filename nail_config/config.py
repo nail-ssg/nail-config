@@ -1,10 +1,10 @@
 import os
-from common import dict_enrich, dict_concat2
+
 import ruamel.yaml as yaml
+from .common import dict_enrich, dict_concat2
 
 
 class Config(object):
-
     """docstring for Config"""
     _default_config = {}
     _default_config_list = []
@@ -110,7 +110,6 @@ class Config(object):
                 if self.get_comment(key) is None:
                     self.set_comment(key, comments[key])
 
-
     def as_yamlstr(self):
         self._assemble()
         return yaml.dump(self._yaml_config, Dumper=yaml.RoundTripDumper)
@@ -142,7 +141,7 @@ class Config(object):
         return result
 
     def set_comment(self, option_name: str, comment: str):
-        self._change_tree(self._comments, option_name+'.#eol', comment)
+        self._change_tree(self._comments, option_name + '.#eol', comment)
         self._changed = True
 
     @staticmethod
