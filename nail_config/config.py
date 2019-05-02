@@ -14,6 +14,7 @@ class Config(object):
     _changed = False
     delimiter = '/'
     filename = ''
+    auto_save = False
 
     def __init__(self):
         self._yaml_config = yaml.comments.CommentedMap()
@@ -93,6 +94,7 @@ class Config(object):
         self.filename = filename
         self._yaml_config = yaml.comments.CommentedMap()
         if os.path.exists(filename):
+            # noinspection PyBroadException
             try:
                 with open(filename, 'r', encoding='utf-8') as f:
                     self.loads(f)
@@ -102,6 +104,8 @@ class Config(object):
         return False
 
     def save(self):
+        if not self.filename or not self.auto_save:
+            return
         self._assemble()
         with open(self.filename, 'w', encoding='utf-8') as f:
             yaml.dump(self._yaml_config, f, Dumper=yaml.RoundTripDumper)
@@ -206,3 +210,7 @@ class Config(object):
     @property
     def comments(self):
         return self._comments
+
+    @property
+    def changed(self):
+        return self._changed
