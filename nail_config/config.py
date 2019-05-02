@@ -1,10 +1,10 @@
 import os
-from nail_config.common import dict_glue, dict_update
+
 import ruamel.yaml as yaml
+from nail_config.common import dict_glue, dict_update
 
 
 class Config(object):
-
     """docstring for Config"""
     _default_config = {}
     _default_config_list = []
@@ -106,11 +106,11 @@ class Config(object):
         with open(self.filename, 'w', encoding='utf-8') as f:
             yaml.dump(self._yaml_config, f, Dumper=yaml.RoundTripDumper)
 
-    def add_default_config(self, dconf, comments):
+    def add_default_config(self, default_config, comments):
         self._changed = True
-        if dconf not in self._default_config_list:
-            self._default_config_list += [dconf]
-        dict_update(self._default_config, dconf)
+        if default_config not in self._default_config_list:
+            self._default_config_list += [default_config]
+        dict_update(self._default_config, default_config)
         if comments:
             for key in comments:
                 if self.get_comment(key) is None:
