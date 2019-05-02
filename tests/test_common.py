@@ -1,8 +1,8 @@
-import pytest
 import sys
 from copy import deepcopy as copy
-sys.path += ['./nail_config']
-from common import *
+
+sys.path.append('./nail_config')
+from nail_config.common import *
 
 a = {
     'a': 1, 'b': 'c', 'd': None,
@@ -25,50 +25,50 @@ et5 = et1
 
 
 def test_glue_1():
-    rslt = dict_glue(a, b1)
-    assert rslt == et1
+    result = dict_glue(a, b1)
+    assert result == et1
 
 
 def test_glue_2():
-    rslt = dict_glue(a, b1, nochange=False)
-    assert rslt == et2
+    result = dict_glue(a, b1, nochange=False)
+    assert result == et2
     assert a == et1
 
 
 def test_glue_3():
-    rslt = dict_glue(a, b3)
-    assert rslt == et3
+    result = dict_glue(a, b3)
+    assert result == et3
 
 
 def test_glue_4():
-    rslt = dict_glue(a, b4, False)
-    assert rslt == et4
+    result = dict_glue(a, b4, False)
+    assert result == et4
 
 
 def test_glue_5():
-    rslt = dict_glue(a, b5)
-    assert rslt == et5
+    result = dict_glue(a, b5)
+    assert result == et5
 
 
 def test_add_1():
-    rslt = {'a': '1'}
-    assert add_to_dict(rslt, 'b/c/d', 2)
-    assert rslt == {'a': '1', 'b': {'c': {'d': 2}}}
+    result = {'a': '1'}
+    assert add_to_dict(result, 'b/c/d', 2)
+    assert result == {'a': '1', 'b': {'c': {'d': 2}}}
 
 
 def test_add_2():
-    rslt = {'a': '1'}
-    assert not add_to_dict(rslt, 'a/c/d', 2)
-    assert rslt == {'a': '1'}
+    result = {'a': '1'}
+    assert not add_to_dict(result, 'a/c/d', 2)
+    assert result == {'a': '1'}
 
 
 def test_add_3():
-    rslt = {'a': {}}
-    assert add_to_dict(rslt, 'a/c/d', 2)
-    assert rslt == {'a': {'c': {'d': 2}}}
+    result = {'a': {}}
+    assert add_to_dict(result, 'a/c/d', 2)
+    assert result == {'a': {'c': {'d': 2}}}
 
 
 def test_add_4():
-    rslt = {'a': None}
-    assert add_to_dict(rslt, 'a/c/d', 2)
-    assert rslt == {'a': {'c': {'d': 2}}}
+    result = {'a': None}
+    assert add_to_dict(result, 'a/c/d', 2)
+    assert result == {'a': {'c': {'d': 2}}}

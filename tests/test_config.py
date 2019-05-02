@@ -1,15 +1,18 @@
-import sys
 import os
+import sys
+
 import pytest
+
 from .prints import yprint
-sys.path += ['./nail_config']
-from config import Config
+
+sys.path.append('./nail_config')
+from nail_config.config import Config
 
 
 @pytest.fixture(scope='function')
 def empty_conf():
     conf = Config()
-    conf.delimeter = '.'
+    conf.delimiter = '.'
     return conf
     del conf
 
@@ -164,7 +167,7 @@ c:
 
 def show_conf(conf):
     print()
-    yprint(conf._comments)
+    yprint(conf.comments)
     yprint(conf._config)
     print('changed:', conf._changed)
 
@@ -173,12 +176,16 @@ def test_loads(conf_with_comments2):
     show_conf(conf_with_comments2)
 
 
+def full_path(filename):
+    return os.path.join(os.path.dirname(__file__), 'data', filename)
+
+
 def test_load():
-    path1 = os.path.abspath('./tests/data/config.yml')
-    path2 = os.path.abspath('./tests/data/config1.yml')
+    path1 = full_path('config.yml')
+    path2 = full_path('config1.yml')
     conf = Config()
-    assert conf.load(path1) == False
-    assert conf.load(path2) == True
-    yprint(conf._comments)
+    assert not bool(conf.load(path1))
+    assert conf.load(path2)
+    yprint(conf.comments)
     assert conf('a') == 1
     assert conf('b') == {'c': 3, 'd': 1, 'e': '#'}

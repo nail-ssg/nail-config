@@ -12,7 +12,7 @@ class Config(object):
     _yaml_config = None
     _comments = {}
     _changed = False
-    delimeter = '/'
+    delimiter = '/'
     filename = ''
 
     def __init__(self):
@@ -77,7 +77,7 @@ class Config(object):
         if not option_name:
             return node
         value = None
-        options = option_name.split(self.delimeter)
+        options = option_name.split(self.delimiter)
         last_opt = options[-1]
         for option in options[:-1]:
             if not (option in node and isinstance(node[option], yaml.comments.CommentedMap)):
@@ -121,7 +121,7 @@ class Config(object):
         return yaml.dump(self._yaml_config, Dumper=yaml.RoundTripDumper)
 
     def set_option(self, option_name: str, value, comment=None):
-        old_value = self._change_tree(self._config, option_name, value, self.delimeter)
+        old_value = self._change_tree(self._config, option_name, value, self.delimiter)
         self.set_comment(option_name, comment)
         return old_value
 
@@ -132,7 +132,7 @@ class Config(object):
             value = self._yaml_config
             return yaml.load(yaml.dump(value, Dumper=yaml.RoundTripDumper), Loader=yaml.Loader)
         value = default_value
-        last_opt = option_name.split(self.delimeter)[-1]
+        last_opt = option_name.split(self.delimiter)[-1]
         if node and last_opt in node:
             value = node[last_opt]
             if isinstance(value, yaml.comments.CommentedMap):
@@ -141,7 +141,7 @@ class Config(object):
 
     def get_comment(self, option_name: str):
         self._assemble()
-        last_opt = option_name.split(self.delimeter)[-1]
+        last_opt = option_name.split(self.delimiter)[-1]
         node = self._get_node(option_name)
         result = self._get_comment(node, last_opt)
         return result
@@ -149,15 +149,15 @@ class Config(object):
     def set_comment(self, option_name: str, comment: str):
         if comment is not None:
             if comment[0] == '^':
-                option_name = self.delimeter.join([option_name, '#before'])
+                option_name = self.delimiter.join([option_name, '#before'])
             else:
-                option_name = self.delimeter.join([option_name, '#eol'])
-        self._change_tree(self._comments, option_name, comment, self.delimeter)
+                option_name = self.delimiter.join([option_name, '#eol'])
+        self._change_tree(self._comments, option_name, comment, self.delimiter)
         self._changed = True
 
     @staticmethod
-    def _change_tree(tree: dict, path: str, value, delimeter='/'):
-        parts = path.split(delimeter)
+    def _change_tree(tree: dict, path: str, value, delimiter='/'):
+        parts = path.split(delimiter)
         last_part = parts[-1]
         node = tree
         for part in parts[:-1]:
@@ -202,3 +202,7 @@ class Config(object):
                     node.yaml_add_eol_comment(comment, option_name)
             else:
                 node.ca.items[option_name][2] = None
+
+    @property
+    def comments(self):
+        return self._comments
