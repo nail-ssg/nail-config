@@ -104,11 +104,14 @@ class Config(object):
         return False
 
     def save(self):
-        if not self.filename or not self.auto_save:
-            return
         self._assemble()
         with open(self.filename, 'w', encoding='utf-8') as f:
             yaml.dump(self._yaml_config, f, Dumper=yaml.RoundTripDumper)
+
+    def do_autosave(self):
+        if not self.filename or not self.auto_save:
+            return
+        self.save()
 
     def add_default_config(self, default_config, comments):
         self._changed = True
